@@ -42,7 +42,7 @@ module.exports = {
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: 5 * 60 * 60,
+      expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
     res
