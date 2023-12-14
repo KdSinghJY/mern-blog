@@ -42,7 +42,7 @@ module.exports = {
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: "1800s",
+      expiresIn: 5 * 60 * 60,
     });
 
     res
@@ -55,4 +55,8 @@ module.exports = {
         .json({ success: false, message: "network problem", error });
     }
   },
+  //   logout: async (reg, res) => {
+  //     try {
+  //     } catch (error) {}
+  //   },
 };

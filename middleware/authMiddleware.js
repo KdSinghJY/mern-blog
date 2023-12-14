@@ -1,15 +1,38 @@
 const jwt = require("jsonwebtoken");
-const auth = (req, res, next) => {
-  try {
-    const token = req.header.authorization.split(" ")[1];
-    if (!token) return res.status(403).send("Access denied.");
+const User = require("../modals/userModal");
+const authMiddleWare = async (req, res, next) => {
+  let token;
+  if (req?.headers?.authorization?.startsWith("Bearer")) {
+    token = req?.headers?.authorization?.split(" ")[1];
 
-    const decoded = jwt.verify(token, process.env.JWTPRIVATEKEY);
-    req.user = decoded;
+    if (token) {
+      const user = jwt.verify(token, process.env.JWT_SECRET);
+
+      const { email } = user;
+      const authUser = await User.findOne({ email: email });
+      req.user = authUser;
+
+      next();
+    }
+  } else {
+    res.status(401).json({ message: "you are not authenticated" });
+  }
+};
+const isAdmin = async (req, res, next) => {
+  const { role } = req.user;
+  if (role.includes("admin")) {
     next();
-  } catch (error) {
-    res.status(400).send("Invalid token");
+  } else {
+    res.status(401).json({ message: "you are not authorized" });
   }
 };
 
-module.exports = { auth };
+const isEditior = async (req, res, next) => {
+  const { role } = req.user;
+  if (role.includes("editior")) {
+    next();
+  } else {
+    res.status(401).json({ message: "you are not authorized" });
+  }
+};
+module.exports = { authMiddleWare, isAdmin, isEditior };
